@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <h2>Predict Wine Quality with AI</h2>
+    <p>Our machine learning model analyzes chemical properties to predict wine quality on a scale from 3 to 9</p>
+    <a href="/predict-page" class="btn">Try Predictor</a>
+</section>
+
+<section class="info">
+    <div class="card">
+        <h3>About the Model</h3>
+        <p>Trained on Wine Quality Dataset with 11 features including:</p>
+        <ul>
+            <li>Fixed acidity</li>
+            <li>Volatile acidity</li>
+            <li>Citric acid</li>
+            <li>Alcohol content</li>
+            <li>And 7 other chemical properties</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h3>How It Works</h3>
+        <ol>
+            <li>Enter wine chemical properties</li>
+            <li>Our AI processes the data</li>
+            <li>Get instant quality prediction</li>
+        </ol>
+        <p>Model accuracy: 89% (tested on validation set)</p>
+    </div>
+</section>
+
+<section class="example">
+    <h2>Пример работы модели</h2>
+    <div class="example-card">
+        <div class="example-values">
+            <h3>Характеристики вина:</h3>
+            <ul>
+                {% for feature in features_list %}
+                <li>
+                    {{ feature.name }}:
+                    {% if feature.name == 'pH' %}
+                        {{ feature.value|round(2) }}
+                    {% elif feature.name == 'Density' %}
+                        {{ feature.value|round(4) }} {{ feature.unit }}
+                    {% else %}
+                        {{ feature.value|round(2) }} {{ feature.unit }}
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="example-result">
+            <div class="quality-badge">
+                <span class="actual">Фактическое качество: {{ sample_quality }}/9</span>
+                <span class="predicted">Предсказанное качество: {{ prediction }}/9</span>
+            </div>
+
+            <div class="quality-bar">
+                <div class="bar actual-bar" style="width: {{ (sample_quality/9*100)|round(1) }}%">
+                    <span>Фактическое</span>
+                </div>
+                <div class="bar predicted-bar" style="width: {{ (prediction/9*100)|round(1) }}%">
+                    <span>Предсказанное</span>
+                </div>
+            </div>
+
+            <div class="accuracy-info">
+                <p>Точность модели для этого примера:
+                   <strong>{{ accuracy|round(1) }}%</strong>
+                </p>
+                <p>Средняя точность модели: <strong>89%</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <p class="refresh-note">
+        Пример обновляется при каждой перезагрузке страницы.
+        <a href="/">Загрузить новый пример</a>
+    </p>
+</section>
+{% endblock %}

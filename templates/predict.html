@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Wine Quality Prediction</h2>
+<div class="prediction-container">
+    <div class="form-container">
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="fixed_acidity">Fixed Acidity (g/dm³):</label>
+                <input type="number" step="0.01" id="fixed_acidity" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="volatile_acidity">Volatile Acidity (g/dm³):</label>
+                <input type="number" step="0.01" id="volatile_acidity" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="citric_acid">Citric Acid (g/dm³):</label>
+                <input type="number" step="0.01" id="citric_acid" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="residual_sugar">Residual Sugar (g/dm³):</label>
+                <input type="number" step="0.01" id="residual_sugar" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="chlorides">Chlorides (g/dm³):</label>
+                <input type="number" step="0.01" id="chlorides" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="free_sulfur_dioxide">Free SO₂ (mg/dm³):</label>
+                <input type="number" step="1" id="free_sulfur_dioxide" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="total_sulfur_dioxide">Total SO₂ (mg/dm³):</label>
+                <input type="number" step="1" id="total_sulfur_dioxide" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="density">Density (g/cm³):</label>
+                <input type="number" step="0.0001" id="density" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pH">pH:</label>
+                <input type="number" step="0.01" id="pH" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="sulphates">Sulphates (g/dm³):</label>
+                <input type="number" step="0.01" id="sulphates" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="alcohol">Alcohol (% vol):</label>
+                <input type="number" step="0.1" id="alcohol" required>
+            </div>
+            
+            <button type="submit" class="btn">Predict Quality</button>
+        </form>
+    </div>
+    
+    <div class="result-container">
+        <div id="resultCard" class="hidden">
+            <h3>Prediction Result</h3>
+            <div class="wine-bottle">🍾</div>
+            <p>Predicted Quality: <span id="qualityResult">-</span>/9</p>
+            <p id="qualityDescription"></p>
+            <button id="resetBtn" class="btn">New Prediction</button>
+        </div>
+        
+        <div id="initialCard">
+            <h3>Enter Wine Properties</h3>
+            <p>Fill all fields and click "Predict Quality"</p>
+            <div class="placeholder-img">📊</div>
+            <p>Our AI model will analyze the chemical properties</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Сбор данных из формы
+    const features = [
+        parseFloat(document.getElementById('fixed_acidity').value),
+        parseFloat(document.getElementById('volatile_acidity').value),
+        parseFloat(document.getElementById('citric_acid').value),
+        parseFloat(document.getElementById('residual_sugar').value),
+        parseFloat(document.getElementById('chlorides').value),
+        parseFloat(document.getElementById('free_sulfur_dioxide').value),
+        parseFloat(document.getElementById('total_sulfur_dioxide').value),
+        parseFloat(document.getElementById('density').value),
+        parseFloat(document.getElementById('pH').value),
+        parseFloat(document.getElementById('sulphates').value),
+        parseFloat(document.getElementById('alcohol').value)
+    ];
+    
+    try {
+        // Отправка запроса на сервер
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ features })
+        });
+        
+        const data = await response.json();
+        const quality = data.quality;
+        
+        // Отображение результата
+        document.getElementById('qualityResult').textContent = quality;
+        document.getElementById('resultCard').classList.remove('hidden');
+        document.getElementById('initialCard').classList.add('hidden');
+        
+        // Описание качества
+        const description = document.getElementById('qualityDescription');
+        if (quality <= 4) description.textContent = "Poor quality wine";
+        else if (quality <= 6) description.textContent = "Average quality wine";
+        else description.textContent = "Excellent quality wine!";
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Prediction failed. Please try again.');
+    }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('predictionForm').reset();
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('initialCard').classList.remove('hidden');
+});
+</script>
+{% endblock %}
